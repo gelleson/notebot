@@ -1,0 +1,13 @@
+.idea/
+.env
+*.env
+**/.DS_Store
+**/*.DS_Store
+
+**/.env
+**/*.env.example
+*.pyc
+__pycache__/
+**/*.pyc
+**/*.pyo
+
