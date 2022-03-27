@@ -1,0 +1,1 @@
+from notebot import settings
