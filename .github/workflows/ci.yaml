@@ -32,7 +32,7 @@ jobs:
         uses: docker/build-push-action@v2
         with:
           push: true
-          tags: gelleson/notebot:${{ github.ref }}
+          tags: gelleson/notebot:${GITHUB_REF/refs\/tags\//}
       - name: Create Release
         id: create_release
         uses: actions/create-release@latest
