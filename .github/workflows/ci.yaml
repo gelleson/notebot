@@ -27,12 +27,13 @@ jobs:
         with:
           push: true
           tags: gelleson/notebot:latest
-
+      - name: Set env
+        run: echo "RELEASE_VERSION=${GITHUB_REF#refs/*/}" >> $GITHUB_ENV
       - name: Build and push
         uses: docker/build-push-action@v2
         with:
           push: true
-          tags: gelleson/notebot:${GITHUB_REF/refs\/tags\//}
+          tags: gelleson/notebot:${{ env.RELEASE_VERSION }}
       - name: Create Release
         id: create_release
         uses: actions/create-release@latest
