@@ -1,0 +1,97 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "helm.fullname" . }}
+  labels:
+    {{- include "helm.labels" . | nindent 4 }}
+spec:
+  {{- if not .Values.autoscaling.enabled }}
+  replicas: {{ .Values.replicaCount }}
+  {{- end }}
+  selector:
+    matchLabels:
+      {{- include "helm.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      {{- with .Values.podAnnotations }}
+      annotations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      labels:
+        {{- include "helm.selectorLabels" . | nindent 8 }}
+    spec:
+      {{- with .Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      serviceAccountName: {{ include "helm.serviceAccountName" . }}
+      securityContext:
+        {{- toYaml .Values.podSecurityContext | nindent 8 }}
+      containers:
+        - name: {{ .Chart.Name }}
+          securityContext:
+            {{- toYaml .Values.securityContext | nindent 12 }}
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          env:
+            - name: LOG_LEVEL
+              value: {{ .Values.app.log_level }}
+            - name: DATABASE_URLS
+              value: "{{ .Values.app.database_urls }}"
+            - name: TELEGRAM_BOT_TOKEN
+              value: "{{ .Values.telegram.token }}"
+            {{- if .Values.telegram.webhook.enabled }}
+            - name: TELEGRAM_WEBHOOK_ENABLED
+              value: "true"
+            - name: TELEGRAM_WEBHOOK_PATH
+              value: "{{ .Values.telegram.webhook.path }}"
+
+            - name: TELEGRAM_INTERNAL_HOST
+              value: "{{ .Values.telegram.webhook.internal_host }}"
+            - name: TELEGRAM_INTERNAL_PORT
+              value: "{{ .Values.telegram.webhook.internal_port }}"
+            {{ end}}
+            - name: TELEGRAM_STORAGE
+              value: "{{ .Values.telegram.storage.type }}"
+
+            {{- if .Values.telegram.storage.type | eq "redis" }}
+            - name: TELEGRAM_STORAGE_REDIS_HOST
+              value: "{{ .Values.telegram.storage.redis.host }}"
+            - name: TELEGRAM_STORAGE_REDIS_PORT
+              value: "{{ .Values.telegram.storage.redis.port }}"
+            - name: TELEGRAM_STORAGE_REDIS_PASSWORD
+              value: "{{ .Values.telegram.storage.redis.password }}"
+            - name: TELEGRAM_STORAGE_REDIS_DB
+              value: "{{ .Values.telegram.storage.redis.db }}"
+            - name: TELEGRAM_STORAGE_REDIS_POOL_SIZE
+              value: "{{ .Values.telegram.storage.redis.pool_size }}"
+            - name: TELEGRAM_STORAGE_REDIS_PREFIX
+              value: "{{ .Values.telegram.storage.redis.prefix }}"
+            {{- end }}
+
+          ports:
+            - name: http
+              containerPort: 80
+              protocol: TCP
+          livenessProbe:
+            httpGet:
+              path: /
+              port: http
+          readinessProbe:
+            httpGet:
+              path: /
+              port: http
+          resources:
+            {{- toYaml .Values.resources | nindent 12 }}
+      {{- with .Values.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}

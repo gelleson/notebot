@@ -26,14 +26,14 @@ jobs:
         uses: docker/build-push-action@v2
         with:
           context: .
-          dockerfile: Dockerfile
+          file: Dockerfile
           push: true
           tags: gelleson/notebot:latest
 
-      - name: Build and push
-        uses: docker/build-push-action@v2
-        with:
-          context: .
-          dockerfile: Dockerfile
-          push: true
-          tags: gelleson/notebot:${{ steps.vars.outputs.tag }}
+#      - name: Build and push
+#        uses: docker/build-push-action@v2
+#        with:
+#          context: .
+#          file: Dockerfile
+#          push: true
+#          tags: gelleson/notebot:${{ steps.vars.outputs.tag }}
