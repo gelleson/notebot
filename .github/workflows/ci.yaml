@@ -2,9 +2,9 @@ name: ci
 
 on:
   push:
-    branches:
-      - 'main'
-
+    # Pattern matched against refs/tags
+    tags:
+      - 'v*'
 jobs:
   docker:
     runs-on: ubuntu-latest
